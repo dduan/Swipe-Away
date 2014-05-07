@@ -40,7 +40,7 @@
   static CFAbsoluteTime        lastTime;
   static CGFloat               lastAngle;
   static CGFloat               angularVelocity;
-  static const CGFloat         threshHold = 100;
+  static const CGFloat         threshHold = 140;
   
   if (gesture.state == UIGestureRecognizerStateBegan)
   {
@@ -100,9 +100,10 @@
     if (fabs(velocity.x) < threshHold && fabs(velocity.y) < threshHold) {
       UISnapBehavior *snap = [[UISnapBehavior alloc] initWithItem:gesture.view snapToPoint:startCenter];
       [self.animator addBehavior:snap];
+      return;
     }
     // otherwise, create UIDynamicItemBehavior that carries on animation from where the gesture left off (notably linear and angular velocity)
-    
+    gesture.enabled = NO;
     UIDynamicItemBehavior *dynamic = [[UIDynamicItemBehavior alloc] initWithItems:@[gesture.view]];
     [dynamic addLinearVelocity:velocity forItem:gesture.view];
     [dynamic addAngularVelocity:angularVelocity forItem:gesture.view];
@@ -113,6 +114,7 @@
     dynamic.action = ^{
       if (!CGRectIntersectsRect(gesture.view.superview.bounds, gesture.view.frame)) {
         [self.animator removeAllBehaviors];
+        gesture.enabled = YES;
       }
     };
     [self.animator addBehavior:dynamic];
